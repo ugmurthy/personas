@@ -15,6 +15,7 @@
     "build-cf-types": "wrangler types"
   },
   "dependencies": {
+    "@cloudflare/ai": "^1.1.0",
     "@remix-run/cloudflare": "^2.8.1",
     "@remix-run/cloudflare-pages": "^2.8.1",
     "@remix-run/react": "^2.8.1",
@@ -22,7 +23,9 @@
     "isbot": "^4.1.0",
     "miniflare": "^3.20231030.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "zod": "^3.22.4",
+    "zodix": "^0.4.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240404.0",

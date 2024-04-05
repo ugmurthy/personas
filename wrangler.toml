@@ -9,8 +9,8 @@ compatibility_date = "2024-04-04"
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai
-# [ai]
-# binding = "AI"
+[ai]
+binding = "AI"
 
 # Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#d1-databases
@@ -32,6 +32,17 @@ compatibility_date = "2024-04-04"
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+[[kv_namespaces]]
+binding = "SYSTEM"
+id = "2ed4cf9ab1764b6f8c55a826b86f35f7"
+
+[[kv_namespaces]]
+binding = "CONVERSATION"
+id = "d7b7945e076c4ddc864e75cbd2f9a5c7"
+
+
+
 
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#queue-producers

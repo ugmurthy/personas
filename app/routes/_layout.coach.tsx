@@ -1,12 +1,12 @@
-import type { LoaderFunction, LoaderFunctionArgs, ActionFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunction, LoaderFunctionArgs,  } from "@remix-run/cloudflare";
 import {json,} from '@remix-run/cloudflare'
-import { useLoaderData,useActionData } from "@remix-run/react";
+import { useLoaderData, } from "@remix-run/react";
 import {z, ZodError} from 'zod';
-
+import {Ai} from '@cloudflare/ai'
 interface Env {
     SYSTEM: KVNamespace;
     CONVERSATION: KVNamespace;
-    AI:any;
+    AI: any;
 }
 // content should be atleast 2 chars
 const contentSchema = z.string().trim().min(2,{message:"Prompt should be atleast 2 characters!"})
@@ -49,10 +49,9 @@ function getURLdetails(request:Request) {
 
 
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
-    const result = [];
-    const params = getURLdetails(args.request);
+    
     const env = args.context.cloudflare.env as Env
-
+    /*
     result.push({params});
     if (params?.model && params?.prompt) { // generate
         // generate
@@ -81,9 +80,25 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
 
         }
     } 
-    //getEnvdetails(env);
+    //getEnvdetails(env); */
 
-    return  json(result);
+    const ai = new Ai(env.AI)
+    
+    const messages = [
+        { role: "system", content: "You are a expert long distance running Coach and ever ready to help runners"},
+        {role:"user",
+         content: "My 5k time is 00:24:45, my 10k time is 00:48:50. Please suggest workout to improve me marathon time."}
+    ];
+    console.log("Zod : " ,inputSchema.safeParse(messages))
+    const stream = await ai.run("@hf/thebloke/llama-2-13b-chat-awq", {
+        messages,
+        stream:true,
+    })
+    return new Response(stream,{
+        headers: { "content-type":"text/event-stream"},
+    });
+
+   
 
 }
 
