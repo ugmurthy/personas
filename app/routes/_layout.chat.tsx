@@ -7,6 +7,14 @@ interface Env {
     CONVERSATION: KVNamespace;
 }
 
+type SysRole = {
+	role: "system";
+	content: string;
+}
+async function setSystemPrompt(e:Env,name:string,persona:SysRole,TTL=60*60*24) {
+    await e.SYSTEM.put(name,JSON.stringify(persona) );
+	console.log("setSystemPrompt ",name, persona, TTL )
+}
 
 function getURLdetails(request:Request) {
 	
@@ -26,6 +34,7 @@ function getURLdetails(request:Request) {
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const result = [];
     const params = getURLdetails(args.request);
+    const env = args.context.cloudflare.env as Env
 
     result.push({params});
     if (params?.model && params?.prompt) { // generate
@@ -44,7 +53,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
         }
     }
 
-    /* if (params?.name && params?.system) { // set system prompt
+     if (params?.name && params?.system) { // set system prompt
         if (params?.name === 'list') { // list all KVs fron namespace SYSTEM
             console.log("LISTING.....")
             const list = await env.SYSTEM.list();
@@ -54,7 +63,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
             await setSystemPrompt(env,params?.name,{role:"system",content:params?.system})
 
         }
-    } */
+    } 
     //getEnvdetails(env);
 
     return  json(result);
