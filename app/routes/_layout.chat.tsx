@@ -1,38 +1,45 @@
-import type { LoaderFunction, LoaderFunctionArgs, ActionFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import {json,} from '@remix-run/cloudflare'
 import { useLoaderData,useActionData } from "@remix-run/react";
 import {z, ZodError} from 'zod';
+import { setSystemPrompt,setMemory } from "~/module/utils";
+////////////////
+// interface Env {
+//     SYSTEM: KVNamespace;
+//     CONVERSATION: KVNamespace;
+//     AI:any;
+// }
+// // content should be atleast 2 chars
+// const contentSchema = z.string().trim().min(2,{message:"Prompt should be atleast 2 characters!"})
 
-interface Env {
-    SYSTEM: KVNamespace;
-    CONVERSATION: KVNamespace;
-    AI:any;
-}
-// content should be atleast 2 chars
-const contentSchema = z.string().trim().min(2,{message:"Prompt should be atleast 2 characters!"})
+// // a message: {role:<ROLE>,content:<CONTENT>}
+// const messageSchema = z.object({
+//     role: z.enum(["system","user","assistant"]),
+//     content: contentSchema
+// })
 
-// a message: {role:<ROLE>,content:<CONTENT>}
-const messageSchema = z.object({
-    role: z.enum(["system","user","assistant"]),
-    content: contentSchema
-})
-
-// input is an array of message - {messages:[m1,m2,m3]}
-const inputSchema = z.array(messageSchema)
-const sysSchema = z.object({
-    role:z.string().startsWith("system"),
-    content: contentSchema
-})
-// infer types  from schemas if needed
-type Input = z.infer<typeof inputSchema>
-type SysRole = z.infer<typeof sysSchema>
+// // input is an array of message - {messages:[m1,m2,m3]}
+// const inputSchema = z.array(messageSchema)
+// const sysSchema = z.object({
+//     role:z.string().startsWith("system"),
+//     content: contentSchema
+// })
+// // infer types  from schemas if needed
+// type Input = z.infer<typeof inputSchema>
+// type SysRole = z.infer<typeof sysSchema>
 
 
-async function setSystemPrompt(e:Env,name:string,persona:SysRole,TTL=60*60*24) {
-    await e.SYSTEM.put(name,JSON.stringify(persona) );
-	console.log("setSystemPrompt ",name, persona, TTL )
-}
+// async function setSystemPrompt(e:Env,name:string,persona:SysRole,TTL=60*60*24) {
+//     const data = []
+//     data.push(persona)
+//     await e.SYSTEM.put(name,JSON.stringify(data) );
+// 	console.log("setSystemPrompt ",name, persona, TTL )
+// }
 
+// async function setMemory(e:Env,responses:Input,TTL=60*60*24) {
+//     await e.CONVERSATION.put("memory",JSON.stringify(responses))
+// }
+/////////////
 function getURLdetails(request:Request) {
 	
 		const url = new URL(request.url);
@@ -52,8 +59,15 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const result = [];
     const params = getURLdetails(args.request);
     const env = args.context.cloudflare.env as Env
-
+    const user = {role:"user",content:"Hi How are you?"}
+    const asst = {role:"assistant",content:"I am here to help you"}
+    const rdata = [];
+    rdata.push(user)
+    rdata.push(asst)
     result.push({params});
+    console.log("Memory" ,rdata)
+    await setMemory(env,rdata);
+
     if (params?.model && params?.prompt) { // generate
         // generate
         // save response to KV conversation if context enabled
@@ -86,14 +100,3 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     return  json(result);
 
 }
-
-/* export default function Component() {
-    //const {model,prompt,system,} = useLoaderData<typeof loader>();
-    const result = useLoaderData<typeof loader>();
-    return (
-        <div>
-        <div className="p-4 text-2xl text-blue-500">Details from Cloudflare</div>
-        <pre>{JSON.stringify(result,null,2)}</pre>
-        </div>
-    )
-} */
