@@ -34,7 +34,35 @@ export async function setSystemPrompt(e:Env,name:string,persona:SysRole,TTL=60*6
 	console.log("setSystemPrompt ",name, persona, TTL )
 }
 
+export async function getSystemPrompt(e:Env,keyname:string,) {
+    try {
+        const persona = JSON.parse(await e.SYSTEM.get(keyname)) ;
+        return persona;
+    } catch(e) {
+        return []
+    }
+}
+
+
 export async function setMemory(e:Env,responses:Input,TTL=60*60*24) {
     await e.CONVERSATION.put("memory",JSON.stringify(responses))
 }
 
+export async function getMemory(e:Env) {
+    try {
+    const memory = JSON.parse(await e.CONVERSATION.get("memory"))
+        return memory;
+    } catch(e) {
+        console.log("Error reading KV 'memory'")
+        return [];
+    }
+}
+
+export async function getPersonas(e:Env) {
+    const pList = await e.SYSTEM.list();
+        if (pList?.list_complete) { // we have list
+            const names = pList?.keys;
+            return names.map((n) =>n.name)
+        }
+        return []   
+}
