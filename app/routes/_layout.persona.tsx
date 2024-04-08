@@ -1,4 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useActionData } from "@remix-run/react";
 import {json,} from '@remix-run/cloudflare'
 import { setSystemPrompt,setMemory, getSystemPrompt, getMemory, getPersonas } from "~/module/utils.server";
 import {z,ZodError} from 'zod'
@@ -46,8 +47,10 @@ export const action:ActionFunction = async (args:ActionFunctionArgs) =>{
     return json({success:true,model,system:persona_data,persona,memory,prompt})
 }
 
-export const loader = async() => {
-    return {hello:"hello, this is dummy loader"}
+export const loader:LoaderFunction = async(args:LoaderFunctionArgs) => {
+    const data = useActionData();
+    console.log("/persona Loader ",JSON.stringify(data));
+    return json(data);
 }
 /* 
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
