@@ -3,8 +3,7 @@ import {json,} from '@remix-run/cloudflare'
 import _ from 'lodash'
 import {useState,useEffect} from 'react'
 import { useLoaderData, useLocation, useNavigate } from '@remix-run/react';
-import { useEventSource } from "remix-utils/sse/react";
-import { chat, abort } from "~/module/models";
+
 interface Env {
     SYSTEM: KVNamespace;
     CONVERSATION: KVNamespace;
@@ -50,11 +49,12 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
         console.log(`persona ${persona} missing`)
         system = []
     }
-    console.log("System ",system);
+    
     
     const memory = JSON.parse(await env.CONVERSATION.get("memory"));
     const user = [{role:"user",content:params?.prompt}]
     const messages = [...system,...memory,...user]
+    console.log("generate Loader ",JSON.stringify({messages,model,persona, prompt:params?.prompt},null,2));
     //return  json({messages,model,system,memory,personas});
     return  json({messages,model,persona, prompt:params?.prompt});
 }
@@ -62,31 +62,50 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
 
 export default function MyComponent() {
     const [data, setData] = useState([]);
+    const [stopped,setStopped]=useState(false)
     const {messages,model,persona, prompt} = useLoaderData(); // (2) - client data
     const url = "https://main.cldflr-remix-app.pages.dev/coach"
 
+    //helper funcs
+    // 8th April
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    function abort() {
+        controller.abort();
+        console.log("Stopped Manually")
+    }
+
+    async function chat(url,messages,model,persona) {
+        const options = {method:"GET",mode:"no-cors",signal:signal}
+        const response = await fetch(url,options)
+        return response;
+    }
+
+
     function handleAbort() {
+      setStopped(true);
       abort();
     }
 
     useEffect(() => {
       const fetchData = async () => {
-  
+        console.log("Client useEffect ",url)
         if (prompt==='') return;
         //const response = await fetch(url, {method:"GET",mode:'no-cors'})
         const response = await chat(url,messages,model,persona)
-        if (response===null) {console.log("Null response"); return;}
+        if (response===null || response?.body===null) {console.log("Null response"); return;}
         const reader = response.body.getReader();
         const readChunk = async () => {
           const { done, value } = await reader.read();
-          if (done) {
+          if (done || stopped ) {
             return; 
           }
           const chunk = new TextDecoder().decode(value);
           const start= _.indexOf(chunk,"{")
           const end = _.lastIndexOf(chunk,"}");
           const chunk_json = JSON.parse(chunk.substring(start,end+1))
-        //console.log(`done=${done} ,JSON: ${JSON.stringify(chunk_json)}`)
+    
           setData(prevData => [...prevData, chunk_json]);
           readChunk(); // Call itself recursively to read the next chunk
         };
@@ -110,7 +129,7 @@ export default function MyComponent() {
 
 
     return (
-      <div> <button className="btn btn-primary" onClick={handleAbort}> Abort </button>
+      <div> <button className="btn btn-neutral" onClick={handleAbort}> Stop </button>
         <pre>
             {data.length} : {result}
         </pre>

@@ -1,10 +1,7 @@
 import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import {defer} from '@remix-run/cloudflare'
+
 import {z, } from 'zod';
 import {Ai} from '@cloudflare/ai'
-
-import { Await, useLoaderData } from "@remix-run/react";
-import { Suspense } from "react";
 
 
 interface Env {
@@ -55,6 +52,7 @@ function getURLdetails(request:Request) {
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const env = args.context.cloudflare.env as Env
     const ai = new Ai(env.AI)
+    console.log(`/coach : Loader typeof -  ai: ${typeof ai} env.AI: ${typeof env.AI}`)
     const messages = [
         { role: "system", content: "You are a expert long distance running Coach and ever ready to help runners"},
         {role:"user",
