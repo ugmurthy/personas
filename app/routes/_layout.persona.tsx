@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useActionData } from "@remix-run/react";
+import type { ActionFunctionArgs, ActionFunction, LoaderFunction,LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import {json,} from '@remix-run/cloudflare'
 import { setSystemPrompt,setMemory, getSystemPrompt, getMemory, getPersonas } from "~/module/utils.server";
 import {z,ZodError} from 'zod'
@@ -48,54 +48,24 @@ export const action:ActionFunction = async (args:ActionFunctionArgs) =>{
 }
 
 export const loader:LoaderFunction = async(args:LoaderFunctionArgs) => {
-    const data = useActionData();
-    console.log("/persona Loader ",JSON.stringify(data));
-    return json(data);
+    
+    console.log("/persona Loader ");
+    return {}
 }
-/* 
-export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
-    const result = [];
-    const params = getURLdetails(args.request);
-    const env = args.context.cloudflare.env as Env
-    const user = {role:"user",content:"Hi How are you?"}
-    const asst = {role:"assistant",content:"I am here to help you"}
-    const rdata = [];
-    rdata.push(user)
-    rdata.push(asst)
-    result.push({params});
-    console.log("Memory" ,rdata)
-    await setMemory(env,rdata);
 
-    if (params?.model && params?.prompt) { // generate
-        // generate
-        // save response to KV conversation if context enabled
-        console.log("MODEL GENERATION.....")
-        result.push( {model:params?.model, prompt:params?.prompt});
-
-    } else {
-        if (params?.model) { // only model
-            // get model details
-            // show page of description
-            console.log("MODEL DESCRIPTION.....")
-            const description = params?.model + ": Description"
-            result.push({model:params?.model, description})
-        }
-    }
-
-     if (params?.name && params?.system) { // set system prompt
-        if (params?.name === 'list') { // list all KVs fron namespace SYSTEM
-            console.log("LISTING.....")
-            const list = await env.SYSTEM.list();
-            result.push(list.keys)
-        } else { // create KV in SYSTEM namespace
-            console.log("CREATING KV ",params.name,params.system)
-            await setSystemPrompt(env,params?.name,{role:"system",content:params?.system})
-
-        }
-    } 
-    //getEnvdetails(env);
-
-    return  json(result);
-
+export default function Component(){
+    const data = useActionData()
+    return (
+    <div className="text-2xl">Persons Data
+    <pre>{JSON.stringify(data,null,2)}</pre>
+    <div className="flex flex-col justify-center">
+    <form method="POST">
+    <input type="text" placeholder="prompt" name="prompt" className="input input-bordered input-primary w-full max-w-xs" />
+    <input type="text" placeholder="persona" name="persona" className="input input-bordered input-primary w-full max-w-xs" />
+    <input type="text" placeholder="model" name="model" className="input input-bordered input-primary w-full max-w-xs" />  
+    <button type="submit" className="btn btn-neutral"> Submit </button> 
+    </form>
+    </div>
+    </div>
+    )
 }
- */
