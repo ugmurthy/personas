@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Mic({recordingStatus,onClick, busy="loading-ring"}) {
+export default function Mic({recordingStatus=false,onClick, busy="loading-ring"}) {
 
   const busyCls = "loading loading-lg "+ busy
   const mic = <button 

@@ -38,7 +38,7 @@ function errorAtPath(error: ZodError, path: string) {
 
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const {prompt,persona,remember} = getURLdetails(args.request);
-    console.log("/chat LOADER raw params ",JSON.stringify({prompt,persona,remember},null,2));
+    //console.log("/chat LOADER raw params ",JSON.stringify({prompt,persona,remember},null,2));
     const whichModel = {
       coding:"@hf/thebloke/codellama-7b-instruct-awq",
       translate:"@cf/thebloke/discolm-german-7b-v1-awq",
@@ -47,7 +47,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const env = args.context.cloudflare.env as Env; 
     const result = Routeschema.safeParse({prompt,persona,remember});
     const personas = await getPersonas(env);
-    console.log("/CHAT LOADER validation result ",JSON.stringify(result,null,2));
+    ///console.log("/CHAT LOADER validation result ",JSON.stringify(result,null,2));
     if(!result.success) {
       throw new Error(JSON.stringify({success:false,
         personaError: errorAtPath(result.error, "persona"),
@@ -100,11 +100,11 @@ export default function MyComponent() {
     // success will be used in useEffect to return before fetching
     const [data, setData] = useState([]);
     const [done, setDone] = useState(false);
-    //const [stopped,setStopped]=useState(false)
+    const [responseData,setResponseData]=useState(); // used in AUDIO component
     const navigate = useNavigate();
     const responseRef = useRef(null);
-    const isInferencing = !done && data.length;
-    const isEvaluating  = !done && data.length === 0;
+    const isInferencing = !done && data?.length;
+    const isEvaluating  = !done && data?.length === 0;
     //const url = "https://main.cldflr-remix-app.pages.dev/coach"
     const personaURL = "https://main.cldflr-remix-app.pages.dev/persona"
 
@@ -154,9 +154,9 @@ export default function MyComponent() {
     // hook to capture stream
     useEffect(() => {
       const fetchData = async () => {
-        console.log("Client useEffect ",personaURL)
-        console.log("Client useEffect success ",success)
-        console.log("Client useEffect prompt len is ",prompt.length)
+        // console.log("Client useEffect ",personaURL)
+        // console.log("Client useEffect success ",success)
+        // console.log("Client useEffect prompt len is ",prompt.length)
         if (!success || prompt==="") return;
         setDone(false);
         
@@ -165,7 +165,7 @@ export default function MyComponent() {
         const reader = response.body.getReader();
         const readChunk = async () => {
           const { done, value } = await reader.read();
-          if (done || stopped ) {
+          if (done ) {
             setDone(true);
             return; 
           }
@@ -256,10 +256,10 @@ export default function MyComponent() {
         </form>:""}
         <div className="pb-32"></div>
         <Prompt persona={persona}></Prompt>
-        <Audio/>
+        
         </div>
         )
 
   }
-  
+  //<Audio url={"/whisper"} setResponse={setResponseData}/>
    
