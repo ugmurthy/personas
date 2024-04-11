@@ -9,10 +9,12 @@ import {
 
 import type { LinksFunction } from "@remix-run/cloudflare";
 import stylesheet from "~/tailwind.css?url";
+import hljsCSS from './google.css?url';
 import { Progress } from "./components/Progress";
 
 export const links: LinksFunction = () => [
   {rel: "stylesheet",href:stylesheet},
+  {rel: 'stylesheet',href: hljsCSS},
 ]
 
 
@@ -47,7 +49,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  //let errorMessage = error instanceof Error ? error.message : null;
+  let errorMessage = error instanceof Error ? error.message : null;
   let heading = 'Unexpected Error';
   let message =
     'We are very sorry. An unexpected error occurred. Please try again or contact us if the problem persists.';
@@ -61,9 +63,12 @@ export function ErrorBoundary() {
         heading = '404 Not Found';
         message = 'Oops! Looks like you tried to visit a page that does not exist.';
         break;
+      default:
+        heading = 'Server Error'
+        message = 'Something broke in loader/action'
     }
   }
-  const errorMessage = error instanceof Error ? error.message : null;
+  //const errorMessage = error instanceof Error ? error.message : null;
   if (errorMessage) {
     message = errorMessage;
     heading = "Error "

@@ -1,35 +1,19 @@
-import type { MetaFunction } from "@remix-run/cloudflare";
+import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    {
-      name: "description",
-      content: "Welcome to Remix! Using Vite and Cloudflare!",
-    },
+    { title: "Cloudflare Challenge April 2024" },
+    { name: "description", content: "Welcome to TaskAssistant" },
   ];
 };
 
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-remix-site/"
-            rel="noreferrer"
-          >
-            Cloudflare Pages Docs - Remix guide
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className='container pt-32 mx-auto max-w-6xl px-4'>
+       <div className="text-4xl text-center pb-10">Task Assistant</div>
+    <div>
+    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus iure, hic, autem natus quibusdam aliquam sed est fugiat temporibus tenetur quod totam dolores voluptas reiciendis non eum nam amet veritatis?
+    </div>
     </div>
   );
 }
