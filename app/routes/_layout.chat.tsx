@@ -42,7 +42,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     const whichModel = {
       coding:"@hf/thebloke/codellama-7b-instruct-awq",
       translate:"@cf/thebloke/discolm-german-7b-v1-awq",
-      other:"@hf/mistral/mistral-7b-instruct-v0.2"
+      other:"@hf/mistral/mistral-7b-instruct-v0.2",
     }
     const env = args.context.cloudflare.env as Env; 
     const result = Routeschema.safeParse({prompt,persona,remember});
@@ -64,21 +64,28 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     // all validations passed
     // Set MODEL based on persona
     let model =""
+    let modifiedPrompt = ""
     if (persona?.toLowerCase().includes('coding')) {
       model = whichModel.coding;
+      modifiedPrompt = "How can you help you with " + "Programming"
     } else if (persona?.toLowerCase().includes('german')) {
       model = whichModel.translate;
+      modifiedPrompt = modifiedPrompt + "How can you help you with translation"
     } else {
       model = whichModel.other
+      modifiedPrompt = "How can you help you?"
     }
     if (model==="")
       return json({success:false,modelError:"No model identified"})
+
+
+
     // Set MEMORY if needed // will be implemented in future
     let memory=[]
     if (remember?.includes("on"))
          memory = await getMemory(env);    
-
-    return  json({success:true, model,persona, prompt,remember, memory, personas});
+    const promptVal = prompt!=null ? prompt:modifiedPrompt;
+    return  json({success:true, model,persona, prompt:promptVal,remember, memory, personas});
 }
 
 
@@ -107,7 +114,7 @@ export default function MyComponent() {
     const isEvaluating  = !done && data?.length === 0;
     //const url = "https://main.cldflr-remix-app.pages.dev/coach"
     const personaURL = "https://main.cldflr-remix-app.pages.dev/persona"
-
+    let  modfiedPrompt = prompt!=""?prompt:"How can you help?" 
 
     //helper funcs
     // 8th April
@@ -117,13 +124,6 @@ export default function MyComponent() {
     function abort() {
         controller.abort();
         console.log("Stopped Manually")
-    }
-    async function whisper(url,imgBlob) {
-      const formData = new FormData();
-      formData.append("imgBlob",imgBlob);
-      const options = {method:"POST",body:formData,mode:"no-cors"}
-      const response = await fetch(url,options);
-      return response
     }
     async function personaChat(url,model,persona,prompt) {
       // a POST Request to /persona with parameter model,persona,prompt

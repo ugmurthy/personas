@@ -18,12 +18,12 @@ const progress = clsx("progress w-full fixed top-0 z-10",progress_type)
 let md: MarkdownIt | null=null;
 // eslint-disable-next-line react/prop-types
 const persona = tooltip || ""
-console.log("ToolTip, persona,tooltip ",persona,tooltip)
+//console.log("ToolTip, persona,tooltip ",persona,tooltip)
 if (persona.toLowerCase().includes("coding")) {
   md = new MarkdownIt({
     highlight: function (str) {
       let lang='javascript'
-      console.log(`Lang (${lang}) `,str);
+      //console.log(`Lang (${lang}) `,str);
       if (lang && hljs.getLanguage(lang)) {
         try {
           return '<pre><code class="hljs">' +
