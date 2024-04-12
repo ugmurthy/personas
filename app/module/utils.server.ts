@@ -1,5 +1,5 @@
-import {z} from 'zod'
-
+import {effect, z} from 'zod'
+import _ from 'lodash'
 
 interface Env {
     SYSTEM: KVNamespace;
@@ -8,7 +8,7 @@ interface Env {
 }
 
 // content should be atleast 2 chars
-const contentSchema = z.string().trim().min(2,{message:"Prompt should be atleast 2 characters!"})
+const contentSchema = z.string().trim().min(2,{message:"Prompt should not be empty!"})
 
 // a message: {role:<ROLE>,content:<CONTENT>}
 const messageSchema = z.object({
@@ -66,3 +66,46 @@ export async function getPersonas(e:Env) {
         }
         return []   
 }
+
+// This was a tricky function: was solved partly by CodeAssistant (this project) 12/4/2024
+export async function getPersonasPrompt(e:Env) {
+    const personas = await getPersonas(e) 
+    console.log(personas)  
+    const result= await Promise.all(personas.map(async  (p) => {return await getSystemPrompt(e,p)}))
+    return result
+    }
+
+/// returns an array of strings of interest. tobe converted to JSON with care
+export function parseReasoning(inStr) {
+    // outputs JSON - not perfect but reasonable
+    const inAry = inStr.split(":");
+    const out = []
+    //console.log("Array ", inAry)
+    function getReasoning(lookfor) {
+    let idx = _.findIndex(inAry,(s)=>s.includes(lookfor))
+    //console.log("idx ",idx)
+
+    if (idx>=0) {
+        if (idx+1 <= inAry.length) {
+            let result = inAry[idx+1].split(",")[0]
+            let str = `\{"${lookfor}":"${result}" \}`
+            //console.log(out.length,":", str)
+            out.push(str);
+            return str;
+        }
+    }
+    return {}
+    }
+     _.forEach(["REASONING","TEXT","ANSWER"],v=>getReasoning(v))
+    
+    try {
+        // out is an array of strings
+        let reasonJsonAry = out.map((s)=>JSON.parse(s));
+        return {json:true,result:reasonJsonAry}
+    } catch (e) {
+        console.log("parseReason could not conver array to json")
+        return {json:false,result:out}
+    }
+  }
+
+  
