@@ -16,8 +16,11 @@ const color = ['badge-primary','badge-neutral','badge-info','badge-warning']
       <div className="badge badge-secondary">{tagname}</div>
     </h2>
     <p>{desc}</p>
-    <div className="card-actions justify-end">
+    <div className="card-actions  justify-evenly  ">
      {models}
+    </div>
+    <div className='relative'>
+    <a className='absolute center right-0' href={url}><button className='btn btn-xs btn-neutral'>Try me</button></a>
     </div>
   </div>
 </div>

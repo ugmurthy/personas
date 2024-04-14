@@ -1,19 +1,25 @@
 import  { useState, useRef, useEffect } from 'react';
 import Mic from './Mic';
-import Download from './Download';
-import Upload from './Upload';
-import { useActionData } from '@remix-run/react';
+//import Download from './Download';
+//import Upload from './Upload';
+import Up from './Up'
+
+import { useActionData, useNavigation } from '@remix-run/react';
 
 /// This component returns response via setRespons a useState in parent component
-const AudioRecorder =  ({url,update}) => {
-  
+const AudioRecorder =  ({url,update, done}) => {
+  //const navigation = useNavigation();
+  //const isBusy = navigation.state!='idle';
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlobs, setRecordedBlobs] = useState([]);
+  const [isBusy,setIsBusy]=useState(false);
   const mediaRecorderRef = useRef(null);
   const hasRecorded = recordedBlobs.length;
+
   //const [audioResponse,setAudioResponse]=useState({})
   console.log("1. Audio Component params ",url);
-
+  
   //let blobURL=null
   useEffect(() => {
     if (!mediaRecorderRef.current) {
@@ -83,6 +89,7 @@ const AudioRecorder =  ({url,update}) => {
 
   async function whisper(url:string,audioObj:File) {
     console.log("Whisper(POST) ",audioObj.name,audioObj.size)
+    setIsBusy(true);
     const formData = new FormData();
     formData.append("audio",audioObj);
     const options = {
@@ -119,6 +126,7 @@ const AudioRecorder =  ({url,update}) => {
       //.then (res => res?.json())
       .then((data) =>  console.log("UPLOADED ",JSON.stringify(data,null,2)))
       .catch(e=> console.log("UPLOAD Error ",e));
+    
   }
 
   return (
@@ -142,18 +150,15 @@ const AudioRecorder =  ({url,update}) => {
         <div>
 
           <div className='tooltip tooltip-top' data-tip="Audio to Text">
-              <button 
-                  className='btn btn-circle'
-                  onClick={upload} > <Upload/>     
-              </button>
+              <Up 
+                  isBusy={isBusy}
+                  onClick={upload}
+                  busy={"loading-ring text-info"}
+                  > 
+              </Up>
           </div>
 
-          <div className='tooltip tooltip-top' data-tip="Download Audio file">
-            <button 
-                className='btn btn-circle'
-                onClick={downloadRecording} > <Download/>     
-            </button>
-          </div>
+          
 
         </div>
 
@@ -170,4 +175,13 @@ export default AudioRecorder;
 <div>
         <pre>{JSON.stringify(audioResponse)}</pre>
       </div>
-*/
+//download button removed 
+<div className='tooltip tooltip-top' data-tip="Download Audio file">
+            <button 
+                className='btn btn-circle'
+                onClick={downloadRecording} > <Download/>     
+            </button>
+</div>
+
+      */
+

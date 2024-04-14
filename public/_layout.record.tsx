@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Audio from '../components/Audio'
 import Mic from '../components/Mic'
+import Up from '~/components/Up'
 export async function loader() {
   return {}
 }
@@ -12,7 +13,7 @@ function record() {
   return (
     <div className='container pt-32 mx-auto max-w-6xl px-4'>
     <Audio url={url}/>
-    
+    <Up isBusy={true} busy={"loading-ring text-primary"}></Up>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import Chat from '../components/Chat'
 import Prompt from "~/components/Prompt";
 import Audio from "~/components/Audio"
 import EditablePrompt from "~/components/EditablePrompt";
+import Utitlity from "~/components/Utitlity";
 
 interface Env {
     SYSTEM: KVNamespace;
@@ -109,6 +110,7 @@ export default function MyComponent() {
     // success will be used in useEffect to return before fetching
     const [data, setData] = useState([]);
     const [done, setDone] = useState(false);
+    const [transcriptDone,setTranscriptDone]=useState(false)
     // prop drilling : courtesy : Coding Assistant
     // Prompt: A REACT 18 component called Audio has data which was updated using useState(). 
     //         How can the parent component access it?
@@ -125,6 +127,7 @@ export default function MyComponent() {
     function updateAudio(newResponse) {
       console.log("Setting newResponse ",newResponse)
       setAudioResponse(newResponse);
+      setTranscriptDone(true)
       audioRef.current = newResponse.response.text;
     }
     
@@ -287,11 +290,19 @@ export default function MyComponent() {
         >
           {audioResponse?.response.text}
         </Chat>:""}
+        {done?<div className=' p-0  mb-3  ml-4 mr-4  bg-black rounded-lg'><Utitlity result={result} prompt={finalPrompt}></Utitlity></div>:""}
 
+        <div className="flex flex-row space-x-4 justify-center">
         {_.has(audioResponse,['response'])?<form method="GET" >
           <input name="prompt" type="hidden" value={audioResponse?.response.text}></input>
           <input name="persona" type="hidden" value={persona}></input>
           <button className="btn btn-xs btn-primary" type="submit">Confirm Audio transcript?</button>
+        </form>:""}
+
+        {done && germanURL!==''?<form method="GET" >
+          <input name="prompt" type="hidden" value={prompt}></input>
+          <input name="persona" type="hidden" value="KidSafe"></input>
+          <button className="btn btn-xs btn-success" type="submit">Show Sentiment Analysis?</button>
         </form>:""}
 
         {done && germanURL!==''?<form method="GET" >
@@ -302,10 +313,15 @@ export default function MyComponent() {
         {done && persona.toLowerCase().includes("german")?<form method="GET" >
           
           <input name="persona" type="hidden" value="StoryWriter"></input>
-          <button className="btn btn-xs btn-outline" type="submit">Back to English?</button>
+          <button className="btn btn-xs btn-outline" type="submit">Back to StoryWriter?</button>
         </form>:""}
-        
-        <div className=""><Audio url="/whisper" update={updateAudio}></Audio></div>
+        {persona.toLowerCase().includes("kdisafe")?<form method="GET" >
+
+          <input name="persona" type="hidden" value="StoryWriter"></input>
+          <button className="btn btn-xs btn-outline" type="submit">Back to StoryWriter?</button>
+        </form>:""}
+        </div>
+        <div className=""><Audio url="/whisper" update={updateAudio} done={transcriptDone}></Audio></div>
         <div className=" pb-56"></div>
         
         <EditablePrompt initText={_.has(audioResponse,['response'])

@@ -19,14 +19,14 @@ import { Link, Outlet } from '@remix-run/react';
 
 export default function Component() {
     //const [model, setModel] = useState('Model 1');
-const version = 'V0.2 130424 CloudFlare Dev Challenge'
+const version = 'V0.2 140424 CloudFlare Dev Challenge'
 const APPBASE='/chat'
 function Menu() {
-  
+
   const links = [ 
     [APPBASE+"?persona=StoryWriter","Story Writer"],
     [APPBASE+"?persona=CodingAssistant","Coding Assistant"],
-    [APPBASE+"?persona=ChatMistral","Chat/w Mistral"]
+    [APPBASE+"?persona=KidSafe","Sentiment & Reasoning"]
 
     //[APPBASE+"oai/chat","OAI Chat"]
 ]
@@ -52,8 +52,8 @@ function Menu() {
           </label>
         </div> 
         <div className="flex-1 px-2 mx-2">
-            <div className='text-4xl font-extrabold w-100'>
-                <span className="text-center bg-clip-text text-transparent bg-gradient-to-r from-red-400  to-violet-900"><Link to="/">Task Assistant</Link></span>
+            <div className='text-6xl font-extrabold w-100'>
+                <span className="text-center bg-clip-text text-transparent bg-gradient-to-r from-red-400  to-violet-900"><Link to="/"><code>Personas</code></Link></span>
             </div>
         </div>
         <div className="flex-none hidden lg:block">
