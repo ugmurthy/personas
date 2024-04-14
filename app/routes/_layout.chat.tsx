@@ -9,6 +9,8 @@ import { z,ZodError} from "zod";
 import Chat from '../components/Chat'
 import Prompt from "~/components/Prompt";
 import Audio from "~/components/Audio"
+import EditablePrompt from "~/components/EditablePrompt";
+
 interface Env {
     SYSTEM: KVNamespace;
     CONVERSATION: KVNamespace;
@@ -73,7 +75,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
       modifiedPrompt = modifiedPrompt + "How can you help you with translation"
     } else {
       model = whichModel.other
-      modifiedPrompt = "How can you help you?"
+      modifiedPrompt = "Who are you?"
     }
     if (model==="")
       return json({success:false,modelError:"No model identified"})
@@ -107,14 +109,40 @@ export default function MyComponent() {
     // success will be used in useEffect to return before fetching
     const [data, setData] = useState([]);
     const [done, setDone] = useState(false);
-    const [responseData,setResponseData]=useState(); // used in AUDIO component
+    // prop drilling : courtesy : Coding Assistant
+    // Prompt: A REACT 18 component called Audio has data which was updated using useState(). 
+    //         How can the parent component access it?
+    const [audioResponse,setAudioResponse]=useState(null);// used in AUDIO component
+    
     const navigate = useNavigate();
     const responseRef = useRef(null);
     const isInferencing = !done && data?.length;
     const isEvaluating  = !done && data?.length === 0;
+
     //const url = "https://main.cldflr-remix-app.pages.dev/coach"
     const personaURL = "https://main.cldflr-remix-app.pages.dev/persona"
-    let  modfiedPrompt = prompt!=""?prompt:"How can you help?" 
+    const audioRef = useRef("")
+    function updateAudio(newResponse) {
+      console.log("Setting newResponse ",newResponse)
+      setAudioResponse(newResponse);
+      audioRef.current = newResponse.response.text;
+    }
+    
+    // let audioText=""
+    // if (_.has(audioResponse,['response'])) {
+    //   audioText=audioResponse.response.text
+    //   audioRef.current = audioText;
+    // }
+    // Audio Prompt takes precedence over Text
+    //const finalPrompt = audioText===""?prompt:audioText;
+    //const finalPrompt = audioRef.current===""?prompt:audioRef.current;
+    const finalPrompt = _.has(audioResponse,['response'])?audioResponse?.response.text:prompt
+    console.log("------------")
+    console.log(`audio ( ${audioResponse?.response.text} )`)
+    console.log("prompt ",prompt)
+    console.log("Final Prompt ",finalPrompt)
+    console.log("------------")
+    // Audio Prompt end
 
     //helper funcs
     // 8th April
@@ -151,6 +179,7 @@ export default function MyComponent() {
       //console.log("Chunks2Array: ",objArray);
       return _.compact(objArray)
     }
+  
     // hook to capture stream
     useEffect(() => {
       const fetchData = async () => {
@@ -159,8 +188,8 @@ export default function MyComponent() {
         // console.log("Client useEffect prompt len is ",prompt.length)
         if (!success || prompt==="") return;
         setDone(false);
-        
-        const response = await personaChat(personaURL,model,persona,prompt)
+        console.log("useEffect finalPrompt ",finalPrompt);
+        const response = await personaChat(personaURL,model,persona,finalPrompt)
         if (response===null || response?.body===null) {console.log("Null response"); return;}
         const reader = response.body.getReader();
         const readChunk = async () => {
@@ -231,9 +260,11 @@ export default function MyComponent() {
                 me={true}
                 tooltip={"You"}
                 ref={null}
+                chatColor="chat-bubble-success"
         >
           {prompt}
         </Chat>:""}
+        
         {result!==""?<Chat className="bg-gray-50 text-sm rounded-t-lg scroll-smooth"
                 promptClass="text-2xl font-normal"
                 pendingStatus={isInferencing}
@@ -241,9 +272,28 @@ export default function MyComponent() {
                 me={false}
                 tooltip={persona||""}
                 ref={responseRef}
+                
         >
           {result}
         </Chat>:""}
+        {_.has(audioResponse,['response']) ? <Chat className="bg-blue-100 text-sm rounded-t-lg scroll-smooth"
+                promptClass="text-2xl font-normal"
+                pendingStatus={false}
+                progress_type={'progress-primary'}
+                me={true}
+                chatColor="chat-bubble-primary"
+                tooltip={"From Audio"}
+                ref={null}
+        >
+          {audioResponse?.response.text}
+        </Chat>:""}
+
+        {_.has(audioResponse,['response'])?<form method="GET" >
+          <input name="prompt" type="hidden" value={audioResponse?.response.text}></input>
+          <input name="persona" type="hidden" value={persona}></input>
+          <button className="btn btn-xs btn-primary" type="submit">Confirm Audio transcript?</button>
+        </form>:""}
+
         {done && germanURL!==''?<form method="GET" >
           <input name="prompt" type="hidden" value={result}></input>
           <input name="persona" type="hidden" value="German"></input>
@@ -254,12 +304,18 @@ export default function MyComponent() {
           <input name="persona" type="hidden" value="StoryWriter"></input>
           <button className="btn btn-xs btn-outline" type="submit">Back to English?</button>
         </form>:""}
-        <div className="pb-32"></div>
-        <Prompt persona={persona}></Prompt>
         
+        <div className=""><Audio url="/whisper" update={updateAudio}></Audio></div>
+        <div className=" pb-56"></div>
+        
+        <EditablePrompt initText={_.has(audioResponse,['response'])
+                                    ?audioResponse?.response.text
+                                    :""} 
+                        persona={persona}></EditablePrompt>
         </div>
         )
 
   }
   //<Audio url={"/whisper"} setResponse={setResponseData}/>
-   
+  // prompt of 13/4
+   //<Prompt persona={persona}></Prompt>

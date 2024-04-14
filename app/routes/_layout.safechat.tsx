@@ -19,6 +19,7 @@ const Routeschema = z.object({
   persona: z.string().trim().min(3),
   prompt: z.string().trim().nullable().optional(),
   remember: z.string().nullable().optional(),
+  check:z.string().nullable().optional(),
 });
 
 function errorAtPath(error: ZodError, path: string) {
@@ -32,13 +33,14 @@ function errorAtPath(error: ZodError, path: string) {
       const persona = url.searchParams.get("persona");
 			const prompt= url.searchParams.get("prompt");
 			const remember =url.searchParams.get("remember")
-			return {prompt,persona,remember}
+            const check =url.searchParams.get("check")
+			return {prompt,persona,remember,check}
 	}
 } 
 
 export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
-    const {prompt,persona,remember} = getURLdetails(args.request);
-    //console.log("/chat LOADER raw params ",JSON.stringify({prompt,persona,remember},null,2));
+    const {prompt,persona,remember,check} = getURLdetails(args.request);
+    console.log("/safechat LOADER raw params ",JSON.stringify({prompt,persona,remember,check},null,2));
     const whichModel = {
       coding:"@hf/thebloke/codellama-7b-instruct-awq",
       translate:"@cf/thebloke/discolm-german-7b-v1-awq",
@@ -65,6 +67,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     // Set MODEL based on persona
     let model =""
     let modifiedPrompt = ""
+    
     if (persona?.toLowerCase().includes('coding')) {
       model = whichModel.coding;
       modifiedPrompt = "How can you help you with " + "Programming"
@@ -85,7 +88,7 @@ export const loader:LoaderFunction = async (args:LoaderFunctionArgs )=>{
     if (remember?.includes("on"))
          memory = await getMemory(env);    
     const promptVal = prompt!=null ? prompt:modifiedPrompt;
-    return  json({success:true, model,persona, prompt:promptVal,remember, memory, personas});
+    return  json({success:true, model,persona, prompt:promptVal,remember, memory, personas,check});
 }
 
 
@@ -103,19 +106,20 @@ export default function MyComponent() {
     // CODE for testing ends here
     */
     
-    const {success,model,persona,prompt,remember,memory,personas} = ret_val;
+    const {success,model,persona,prompt,remember,memory,personas,check} = ret_val;
     // success will be used in useEffect to return before fetching
     const [data, setData] = useState([]);
     const [done, setDone] = useState(false);
-    const [responseData,setResponseData]=useState(); // used in AUDIO component
+    const [evaluation,setEvaluation]=useState({}); // used by fetch - checkURL
     const navigate = useNavigate();
     const responseRef = useRef(null);
     const isInferencing = !done && data?.length;
     const isEvaluating  = !done && data?.length === 0;
-    //const url = "https://main.cldflr-remix-app.pages.dev/coach"
+    const toCheck = check?.includes("on")
     const personaURL = "https://main.cldflr-remix-app.pages.dev/persona"
-    let  modfiedPrompt = prompt!=""?prompt:"How can you help?" 
+    const checkURL = "https://main.cldflr-remix-app.pages.dev/llmutils"
 
+    // let  modfiedPrompt = prompt!=""?prompt:"How can you help?" 
     //helper funcs
     // 8th April
     const controller = new AbortController();
@@ -125,6 +129,24 @@ export default function MyComponent() {
         controller.abort();
         console.log("Stopped Manually")
     }
+
+    async function checkPrompt(url,prompt) {
+        // check prompt for appropriateness and is applicable to persona = StoryWriter
+        // do a fetch to /llmutils with model = @hf/mistral/mistral-7b-instruct-v0.2
+    
+        const formdata = new FormData();
+        const modPrompt = "In this text, "+prompt
+        formdata.append("model","@hf/mistral/mistral-7b-instruct-v0.2")
+        formdata.append("prompt",modPrompt);
+        formdata.append("persona","Check");
+        const options = {method:"POST",body:formdata,mode:"no-cors"}
+          const response = await fetch(url,options)
+          console.log(`   checkPrompt : modified prompt :  ${modPrompt}`)
+          console.log(`   checkPrompt : url ${url}`)
+          console.log(`   checkPrompt : response ${JSON.stringify(response,null,2)}`)
+          return response;
+      }
+
     async function personaChat(url,model,persona,prompt) {
       // a POST Request to /persona with parameter model,persona,prompt
       const formData = new FormData();
@@ -151,6 +173,20 @@ export default function MyComponent() {
       //console.log("Chunks2Array: ",objArray);
       return _.compact(objArray)
     }
+    // hook to do appropriatness checks
+    useEffect(()=>{
+        const doEvaluation = async () => {
+            console.log("to Check ? ",toCheck, prompt)
+            if (toCheck) { // check before processing prompt
+                const evaluated_response = await checkPrompt(checkURL,prompt);
+                console.log("doEvaluation response ",JSON.stringify(evaluated_response,null,2));
+                setEvaluation( evaluated_response);
+              }
+          }
+          doEvaluation();
+          return ()=>console.log("UseEffect return check")
+    },[prompt])
+
     // hook to capture stream
     useEffect(() => {
       const fetchData = async () => {
@@ -188,7 +224,6 @@ export default function MyComponent() {
   
         readChunk();
       };
-  
       fetchData();
     }, []);
     
@@ -224,6 +259,16 @@ export default function MyComponent() {
                 <span className="text-red-800">Close <input type="radio" name="my-accordion-1" /> </span>
                 </div>
               </div>
+              {Object.keys(evaluation).length>0?<div className="collapse bg-base-200">
+                <input type="radio" name="my-accordion-1" /> 
+                <div className="collapse-title text-xl font-medium">
+                <span className="underline text-sm text-blue-700">Show Prompt evaluation and Reasoning</span>
+                </div>
+                <div className="collapse-content"> 
+                <pre>{JSON.stringify(evaluation,null,2)}</pre>
+                <span className="text-red-800">Close <input type="radio" name="my-accordion-1" /> </span>
+                </div>
+              </div>:"No Evaluation"}
          {prompt !== null ? <Chat className="bg-blue-100 text-sm rounded-t-lg scroll-smooth"
                 promptClass="text-2xl font-normal"
                 pendingStatus={isEvaluating}

@@ -6,12 +6,13 @@ import parse from 'html-react-parser'
 import { forwardRef, useEffect } from 'react';
 import hljs from 'highlight.js'
 
-const Component = forwardRef(({children ,className, promptClass, imgurl,tooltip,pendingStatus, progress_type, me=true},ref) => {
+const Component = forwardRef(({children ,className, promptClass, imgurl,tooltip,pendingStatus, progress_type, me=true},ref,chatColor="") => {
   
 //const classes = clsx("z-0 mt-2  bg-white text-pretty p-2 shadow-lg",className);
 const classes = clsx("z-0 mt-2  bg-white  p-2 ",className);
-const chatCls = me?"chat chat-start m-2":"chat chat-end m-2"
-const pClass = clsx("m-2 leading-relaxed text-xl font-thin overflow-hidden",promptClass);
+
+const chatCls = me?"chat chat-start m-2 ":"chat chat-end m-2 "
+//const pClass = clsx("m-2 leading-relaxed text-xl font-thin overflow-hidden",promptClass);
 const iurl= imgurl ? imgurl : me ? "/human.png":"/llmBot.png"
 const progress = clsx("progress w-full fixed top-0 z-10",progress_type)
 // tooltip has persona in it
@@ -58,7 +59,7 @@ const parsedHTML = parse(md.render(children))
                 <img className=''  src={iurl} alt="avatar"/>
                 </div>
             </div>
-            <div className="chat-bubble">{parsedHTML}</div>
+            <div className={clsx("chat-bubble",chatColor)}>{parsedHTML}</div>
       </div>
 </div>
   )

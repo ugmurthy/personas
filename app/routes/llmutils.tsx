@@ -78,10 +78,10 @@ export const action:ActionFunction = async (args:ActionFunctionArgs) =>{
     // ;
     
     /// NO STREAM : Short response for llmutils to ensure good latency
-    
-    const mt = persona==='Check'? 256:1024;
-    const resp = await ai.run(model, {messages,stream:false,max_tokens:mt});
-    
+    // not implementing max-tokens now as results are not good and does not help with latency much
+    //const mt = persona==='Check'? 256:1024;
+    const resp = await ai.run(model, {messages,stream:false,});
+    console.log(`/llmutil , persona: ${persona}: resp: `,JSON.stringify(resp,null,2));
     /// checks
     if (persona==='Check') {
         console.log("Check Appropriatness")
@@ -99,7 +99,7 @@ export const action:ActionFunction = async (args:ActionFunctionArgs) =>{
 
 
 //  uncomment this for test: we need a loader to load the form in order to make a post request
-export const loader:LoaderFunction = async(args:LoaderFunctionArgs) => {
+/* export const loader:LoaderFunction = async(args:LoaderFunctionArgs) => {
     
     console.log("/llmutils Loader ");
     return {}
@@ -155,4 +155,4 @@ export default function Component(){
     
     </div>
     )
-}  
+}   */

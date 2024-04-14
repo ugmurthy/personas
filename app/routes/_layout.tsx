@@ -19,7 +19,7 @@ import { Link, Outlet } from '@remix-run/react';
 
 export default function Component() {
     //const [model, setModel] = useState('Model 1');
-const version = 'Version 0.10 10/Apr/24 CF Code Challenge'
+const version = 'V0.2 130424 CloudFlare Dev Challenge'
 const APPBASE='/chat'
 function Menu() {
   
