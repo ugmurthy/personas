@@ -9,7 +9,7 @@ const color = ['badge-primary','badge-neutral','badge-info','badge-warning']
   return (
     <div>
  <div className="card w-96 bg-base-100 shadow-xl">
-  <figure><img src={src} alt={tagname} /></figure>
+  <figure><img  className='skeleton h-192 w-full' src={src} alt={tagname} /></figure>
   <div className="card-body">
     <h2 className="card-title">
       <a href={url} className='underline'>{title}</a>
