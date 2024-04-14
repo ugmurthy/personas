@@ -10,7 +10,7 @@ PERSONAS Showcase `personas`
 
 All above `personas` use minumum 2 models (one for **guided** text generation, and the second for voice to text as input)
 
-[Have Fun with Persona]() (Link yet to update)
+[Have Fun with Persona](https://main.cldflr-remix-app.pages.dev/)
 
 # BUILT USING
 
