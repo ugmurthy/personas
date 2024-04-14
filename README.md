@@ -21,7 +21,7 @@ All above `personas` use minumum 2 models (one for **guided** text generation, a
 
 Follow the above docs to do you initial setup
 
-## Development
+# Development
 
 1. clone this repo
 2. follow the commands below
