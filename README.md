@@ -1,6 +1,6 @@
 # `PERSONAS`
 
-![screenshot](https://github.com/ugmurthy/persona/blob/main/persona.png)
+![screenshot](./persona.png)
 
 `Personas` is a AI assistant - a Web app demonstrating the ease with which one can build LLM based model avaialble on CloudFlare AI. You can extend the App to use other AI models both paid and [Opensource](https://ollama.com/)
 
