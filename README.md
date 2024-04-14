@@ -1,10 +1,10 @@
-# PERSONAS
+# `PERSONAS`
 
-![alt text](https://github.com/ugmurthy/persona/blob/main/persona.jpg?raw=true)
+![screenshot](https://github.com/ugmurthy/persona/blob/main/persona.png?raw=true)
 
 `Personas` is a AI assistant - a Web app demonstrating the ease with which one can build LLM based model avaialble on CloudFlare AI. You can extend the App to use other AI models both paid and [Opensource](https://ollama.com/)
 
-PERSONAS Showcase `personas`
+`PERSONAS` Showcases 3 `personas`
 
 1. Story Writer that is kidSafe
 2. Code Assistant that can help a developer
